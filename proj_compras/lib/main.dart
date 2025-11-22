@@ -6,8 +6,13 @@ import 'package:proj_compras/view/login_view.dart';
 import 'package:proj_compras/view/recuperarsenha_view.dart';
 import 'package:proj_compras/view/sobre_view.dart';
 import 'package:proj_compras/view/home_view.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
+Future<void> main() async {
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(
     DevicePreview(
       enabled: true,

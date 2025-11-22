@@ -8,8 +8,7 @@ class ProfessionalFeed extends ChangeNotifier {
   final List<ProfessionalPost> _professionalPosts = [
     ProfessionalPost(
       id: 1,
-      description: "*Vaga de emprego*\n" +
-      "Desenvolvedor Flutter Junior - Ribeirão Preto",
+      description: "*Vaga de emprego*\n" "Desenvolvedor Flutter Junior - Ribeirão Preto",
       date: DateTime(2025, 10, 28, 22, 0),
       // imageUrl: "https://storage.googleapis.com/cms-storage-bucket/build-more-with-flutter.f399274b364a6194c43d.png",
       user: UserModel(id: 1, email: "admin@admin.com", name: "Admin", password: "123"),
@@ -17,8 +16,7 @@ class ProfessionalFeed extends ChangeNotifier {
     ),
     ProfessionalPost(
       id: 2,
-      description: "*Vaga de emprego*\n" +
-      "Analista de Suporte Junior - Ribeirão Preto",
+      description: "*Vaga de emprego*\n" "Analista de Suporte Junior - Ribeirão Preto",
       date: DateTime(2025, 11, 10),
       imageUrl: "https://",
       user: UserModel(id: 1, email: "admin@admin.com", name: "Admin", password: "123"),
@@ -26,8 +24,7 @@ class ProfessionalFeed extends ChangeNotifier {
     ),
     ProfessionalPost(
       id: 3,
-      description: "*Vaga de emprego*\n" +
-      "Estágio em Banco de Dados - Ribeirão Preto",
+      description: "*Vaga de emprego*\n" "Estágio em Banco de Dados - Ribeirão Preto",
       date: DateTime(2025, 12, 5),
       user: UserModel(id: 1, email: "admin@admin.com", name: "Admin", password: "123"),
       likesCount: 23,
