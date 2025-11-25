@@ -1,6 +1,7 @@
 // controller/addevento_controller.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../services/maps_service.dart';
 
 class AddEventoController {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
@@ -46,6 +47,9 @@ class AddEventoController {
         throw 'Perfil do usuário não encontrado';
       }
 
+      print('📍 Convertendo endereço em coordenadas...');
+      final coordinates = await GeocodingService.getCoordinates(localizacao);
+
       Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
 
       // Gerar ID único para o evento
@@ -59,6 +63,8 @@ class AddEventoController {
         'description': descricao,
         'date': Timestamp.fromDate(data),
         'location': localizacao,
+        'latitude': coordinates?['lat'],
+        'longitude': coordinates?['lng'], 
         'imageUrl': imagemUrl ?? '',
         'nomeCompleto': userData['nomeCompleto'] ?? '',
         'username': userData['username'] ?? '',

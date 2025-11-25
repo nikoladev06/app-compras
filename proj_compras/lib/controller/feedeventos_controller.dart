@@ -29,31 +29,36 @@ class FeedEventos {
         print('📊 Dados: ${doc.data()}');
         
         try {
+          // 🔥 CORREÇÃO: Use 'doc' em vez de 'data'
+          final data = doc.data() as Map<String, dynamic>;
+          
           final user = UserModel(
-            uid: doc['userId'] ?? '',
-            email: doc['userId'] ?? '', // Usando userId como email temporariamente
-            nomeCompleto: doc['nomeCompleto'] ?? 'Usuário',
-            username: doc['username'] ?? 'usuario',
+            uid: data['userId'] ?? '', // 🔥 CORREÇÃO: use 'data'
+            email: data['userId'] ?? '',
+            nomeCompleto: data['nomeCompleto'] ?? 'Usuário',
+            username: data['username'] ?? 'usuario',
             universidade: 'FATEC RP',
             curso: 'ADS',
             telefone: '',
           );
           
           final evento = Evento(
-            id: doc['id'] ?? 0,
-            title: doc['title'] ?? '',
-            description: doc['description'] ?? '',
-            date: doc['date'] != null 
-                ? (doc['date'] as Timestamp).toDate()
+            id: data['id'] ?? 0, // 🔥 CORREÇÃO: use 'data'
+            title: data['title'] ?? '',
+            description: data['description'] ?? '',
+            date: data['date'] != null 
+                ? (data['date'] as Timestamp).toDate()
                 : DateTime.now(),
-            location: doc['location'] ?? '',
-            imageUrl: doc['imageUrl'] ?? '',
+            location: data['location'] ?? '', // 🔥 CORREÇÃO: 'location' em vez de '_fieldLocation'
+            latitude: data['latitude']?.toDouble(),  // ✅
+            longitude: data['longitude']?.toDouble(), // 🔥 CORREÇÃO: faltava vírgula
+            imageUrl: data['imageUrl'] ?? '',
             user: user,
-            createdAt: doc['createdAt'] != null
-                ? (doc['createdAt'] as Timestamp).toDate()
+            createdAt: data['createdAt'] != null
+                ? (data['createdAt'] as Timestamp).toDate()
                 : DateTime.now(),
-            isLiked: doc['isLiked'] ?? false,
-            likesCount: doc['likesCount'] ?? 0,
+            isLiked: data['isLiked'] ?? false,
+            likesCount: data['likesCount'] ?? 0,
             comentarios: [],
           );
           

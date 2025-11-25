@@ -5,6 +5,10 @@ import '../controller/feedeventos_controller.dart' as feed_eventos;
 import '../controller/professionalfeed_controller.dart' as feed_profissional;
 import '../model/postevento_model.dart';
 import '../model/professionalpost_model.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/services.dart';
+
+
 
 import 'userprofile_view.dart';
 import 'addevento_view.dart';
@@ -88,6 +92,184 @@ class _HomeViewState extends State<HomeView> {
       print('❌ Erro ao carregar perfil no drawer: $e');
     }
   }
+
+  // 🔥 NOVO MÉTODO: Widget de preview do mapa
+  Widget _buildMapPreview(double? lat, double? lng, String location) {
+    if (lat == null || lng == null) {
+      // Fallback: mostrar apenas o texto da localização
+      return Row(
+        children: [
+          const Icon(Icons.location_on_outlined, size: 14, color: Colors.grey),
+          const SizedBox(width: 4),
+          Expanded(
+            child: Text(
+              location,
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Mini mapa preview
+        GestureDetector(
+          onTap: () {
+            // TODO: Implementar abertura do mapa completo
+            _mostrarDialogoMapa(location, lat, lng);
+          },
+          child: Container(
+            height: 80,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.grey[800],
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey[600]!),
+            ),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.map_outlined, color: Colors.grey, size: 24),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Ver no mapa',
+                    style: TextStyle(
+                      color: Colors.grey[400],
+                      fontSize: 12,
+                    ),
+                  ),
+                  Text(
+                    '(${lat.toStringAsFixed(4)}, ${lng.toStringAsFixed(4)})',
+                    style: TextStyle(
+                      color: Colors.grey[500],
+                      fontSize: 10,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Row(
+          children: [
+            const Icon(Icons.location_on_outlined, size: 12, color: Colors.grey),
+            const SizedBox(width: 4),
+            Expanded(
+              child: Text(
+                location,
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  // 🔥 NOVO MÉTODO: Diálogo do mapa
+  void _mostrarDialogoMapa(String location, double lat, double lng) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      backgroundColor: const Color(0xFF1F1F20),
+      title: const Row(
+        children: [
+          Icon(Icons.map, color: Colors.white),
+          SizedBox(width: 8),
+          Text('Localização', style: TextStyle(color: Colors.white)),
+        ],
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(location, style: const TextStyle(color: Colors.white, fontSize: 14)),
+          const SizedBox(height: 8),
+          Text('Coordenadas: ${lat.toStringAsFixed(6)}, ${lng.toStringAsFixed(6)}', 
+               style: TextStyle(color: Colors.grey[400], fontSize: 12)),
+          const SizedBox(height: 16),
+          Container(
+            height: 120,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.grey[800],
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey[600]!),
+            ),
+            child: const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.map_outlined, color: Colors.grey, size: 40),
+                  SizedBox(height: 8),
+                  Text('Preview do Mapa', style: TextStyle(color: Colors.grey)),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Fechar'),
+        ),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF6200EE)),
+          onPressed: () async {
+            final String url = 'https://www.google.com/maps/search/?api=1&query=$lat,$lng';
+            try {
+              if (await canLaunchUrl(Uri.parse(url))) {
+                await launchUrl(Uri.parse(url));
+              } else {
+                // 🔥 SE NÃO ABRIR, OFERECE COPIAR
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text('Não foi possível abrir o mapa automaticamente'),
+                    duration: const Duration(seconds: 4),
+                    action: SnackBarAction(
+                      label: 'Copiar Link',
+                      onPressed: () {
+                        Clipboard.setData(ClipboardData(text: url));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Link copiado!'), duration: Duration(seconds: 2)),
+                        );
+                      },
+                    ),
+                  ),
+                );
+              }
+            } catch (e) {
+              // 🔥 EM CASO DE ERRO, OFERECE COPIAR
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text('Link do Maps: '),
+                  duration: const Duration(seconds: 4),
+                  action: SnackBarAction(
+                    label: 'Copiar Link',
+                    onPressed: () {
+                      Clipboard.setData(ClipboardData(text: url));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Link copiado!'), duration: Duration(seconds: 2)),
+                      );
+                    },
+                  ),
+                ),
+              );
+            }
+            Navigator.pop(context);
+          },
+          child: const Text('Abrir no Maps', style: TextStyle(color: Colors.white)),
+        ),
+      ],
+    ),
+  );
+}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -95,8 +277,8 @@ class _HomeViewState extends State<HomeView> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF1F1F20),
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white), // Garante que a seta de voltar e outros ícones sejam brancos
-        leading: Builder( // O leading é mantido para a lógica do drawer
+        iconTheme: const IconThemeData(color: Colors.white),
+        leading: Builder(
           builder: (context) => IconButton(
             icon: const Icon(Icons.menu),
             onPressed: () => Scaffold.of(context).openDrawer(),
@@ -183,9 +365,7 @@ class _HomeViewState extends State<HomeView> {
                 style: TextStyle(color: Colors.red),
               ),
               onTap: () async {
-                // Captura o context da HomeView antes de mostrar o diálogo
                 final homeContext = context;
-
                 final bool? deveSair = await showDialog<bool>(
                   context: homeContext,
                   builder: (dialogContext) => AlertDialog(
@@ -215,7 +395,6 @@ class _HomeViewState extends State<HomeView> {
                   ),
                 );
 
-                // Se o usuário confirmou a saída no diálogo
                 if (deveSair == true) {
                   final bool logoutSucesso = await _profileController.fazerLogout();
                   if (logoutSucesso && homeContext.mounted) {
@@ -238,7 +417,6 @@ class _HomeViewState extends State<HomeView> {
                 builder: (context) => const AddEventoView(),
               ),
             );
-            // Se retornar true, recarrega os eventos
             if (result == true) {
               await _carregarEventos();
             }
@@ -249,7 +427,6 @@ class _HomeViewState extends State<HomeView> {
                 builder: (context) => const AddProfessionalPostView(),
               ),
             );
-            // Se retornar true, recarrega os posts
             if (result == true) {
               await _carregarPostsProfissionais();
             }
@@ -334,6 +511,24 @@ class _HomeViewState extends State<HomeView> {
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                               ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.person_outline,
+                                    size: 12,
+                                    color: Colors.grey[500],
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '${evento.user.nomeCompleto} • @${evento.user.username}',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.grey[500],
+                                    ),
+                                  ),
+                                ],
+                              ),
                               const SizedBox(height: 8),
                               Text(
                                 evento.description,
@@ -345,24 +540,8 @@ class _HomeViewState extends State<HomeView> {
                                 overflow: TextOverflow.ellipsis,
                               ),
                               const SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons.location_on_outlined,
-                                    size: 14,
-                                    color: Colors.grey,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    evento.location,
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
+                              _buildMapPreview(evento.latitude, evento.longitude, evento.location),
+                              const SizedBox(height: 8),
                               Row(
                                 children: [
                                   const Icon(
@@ -451,6 +630,24 @@ class _HomeViewState extends State<HomeView> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.person_outline,
+                                    size: 12,
+                                    color: Colors.grey[500],
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '${post.user.nomeCompleto} • @${post.user.username}',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.grey[500],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
                               Text(
                                 post.description,
                                 style: const TextStyle(

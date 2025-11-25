@@ -7,6 +7,8 @@ class Evento {
   final String description;
   final DateTime date;
   final String location;
+  final double? latitude;
+  final double? longitude;
   final String? imageUrl;
   final UserModel user;
   final DateTime createdAt;
@@ -20,6 +22,8 @@ class Evento {
     required this.description,
     required this.date,
     required this.location,
+    this.latitude,
+    this.longitude,
     this.imageUrl,
     required this.user,
     DateTime? createdAt,
