@@ -50,19 +50,32 @@ class _HomeViewState extends State<HomeView> {
   }
 
   Future<void> _carregarEventos() async {
-    setState(() => _isLoadingEventos = true);
-    try {
-      _eventosAtuais = await _feedEventosController.obterEventos();
-      if (mounted) {
-        setState(() => _isLoadingEventos = false);
-      }
-    } catch (e) {
-      print('❌ Erro ao carregar eventos: $e');
-      if (mounted) {
-        setState(() => _isLoadingEventos = false);
-      }
+  print('🔄 HOMEVIEW: FORÇANDO recarregamento de eventos...');
+  setState(() => _isLoadingEventos = true);
+  
+  try {
+    // 🔥 FORÇA UM NOVO FETCH DOS DADOS
+    final novosEventos = await _feedEventosController.obterEventos();
+    
+    print('✅ HOMEVIEW: ${novosEventos.length} eventos carregados do Firebase');
+    
+    // 🔥 VERIFICA SE ALGUM EVENTO FOI REALMENTE DELETADO
+    if (_eventosAtuais.length != novosEventos.length) {
+      print('📊 HOMEVIEW: Lista atualizada - Antes: ${_eventosAtuais.length}, Depois: ${novosEventos.length}');
+    }
+    
+    setState(() {
+      _eventosAtuais = novosEventos;
+      _isLoadingEventos = false;
+    });
+    
+  } catch (e) {
+    print('❌ HOMEVIEW: Erro crítico ao carregar eventos: $e');
+    if (mounted) {
+      setState(() => _isLoadingEventos = false);
     }
   }
+}
 
   Future<void> _carregarPostsProfissionais() async {
     setState(() => _isLoadingProfissional = true);
@@ -135,7 +148,7 @@ class _HomeViewState extends State<HomeView> {
                   const Icon(Icons.map_outlined, color: Colors.grey, size: 24),
                   const SizedBox(height: 4),
                   Text(
-                    'Ver no mapa',
+                    'Ver no Google Maps',
                     style: TextStyle(
                       color: Colors.grey[400],
                       fontSize: 12,
@@ -192,25 +205,6 @@ class _HomeViewState extends State<HomeView> {
           Text('Coordenadas: ${lat.toStringAsFixed(6)}, ${lng.toStringAsFixed(6)}', 
                style: TextStyle(color: Colors.grey[400], fontSize: 12)),
           const SizedBox(height: 16),
-          Container(
-            height: 120,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: Colors.grey[800],
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.grey[600]!),
-            ),
-            child: const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.map_outlined, color: Colors.grey, size: 40),
-                  SizedBox(height: 8),
-                  Text('Preview do Mapa', style: TextStyle(color: Colors.grey)),
-                ],
-              ),
-            ),
-          ),
         ],
       ),
       actions: [
@@ -275,24 +269,24 @@ class _HomeViewState extends State<HomeView> {
     return Scaffold(
       backgroundColor: const Color(0xFF111112),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1F1F20),
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () => Scaffold.of(context).openDrawer(),
+          backgroundColor: const Color(0xFF1F1F20),
+          elevation: 0,
+          iconTheme: const IconThemeData(color: Colors.white), // Garante que a seta de voltar e outros ícones sejam brancos
+          leading: Builder( // O leading é mantido para a lógica do drawer
+            builder: (context) => IconButton(
+              icon: const Icon(Icons.menu),
+              onPressed: () => Scaffold.of(context).openDrawer(),
+            ),
           ),
-        ),
-        title: const Text(
-          'Integra',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+          title: const Text(
+            'Integra',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
           ),
-        ),
-        centerTitle: true,
+          centerTitle: true,
       ),
       drawer: Drawer(
         backgroundColor: const Color(0xFF1F1F20),
@@ -336,23 +330,32 @@ class _HomeViewState extends State<HomeView> {
                 ],
               ),
             ),
+// No drawer do HomeView - MODIFIQUE ASSIM:
             ListTile(
-              leading: const Icon(
-                Icons.person_outline,
-                color: Colors.grey,
-              ),
-              title: const Text(
-                'Perfil',
-                style: TextStyle(color: Colors.white),
-              ),
+              leading: const Icon(Icons.person_outline, color: Colors.grey),
+              title: const Text('Perfil', style: TextStyle(color: Colors.white)),
               onTap: () {
-                Navigator.pop(context);
+                Navigator.pop(context); // Fecha o drawer
+                
+                print('🚀 HOMEVIEW: Navegando para UserProfileView...');
+                
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => const UserProfileView(),
                   ),
-                );
+                ).then((_) {
+                  // 🔥 FORÇA RECARREGAMENTO COM DELAY PARA GARANTIR
+                  print('🔄 HOMEVIEW: Voltou do UserProfileView - recarregando em 500ms...');
+                  
+                  Future.delayed(const Duration(milliseconds: 500), () {
+                    if (mounted) {
+                      print('🔄 HOMEVIEW: Executando recarregamento...');
+                      _carregarEventos();
+                      _carregarPostsProfissionais();
+                    }
+                  });
+                });
               },
             ),
             ListTile(
@@ -407,6 +410,7 @@ class _HomeViewState extends State<HomeView> {
         ),
       ),
       body: _buildBody(),
+      
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0xFF6200EE),
         onPressed: () async {

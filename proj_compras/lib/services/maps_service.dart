@@ -12,7 +12,7 @@ class GeocodingService {
       final response = await http.get(
         Uri.parse('$_baseUrl?q=${Uri.encodeComponent(address)}&format=json&limit=1'),
         headers: {
-          'User-Agent': 'IntegraApp/1.0 (seu-email@dominio.com)',
+          'User-Agent': 'IntegraApp/1.0 (arthur.oliveira35@fatec.sp.gov.br)',
         },
       );
 

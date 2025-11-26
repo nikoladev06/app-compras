@@ -50,8 +50,10 @@ class _EditUserProfileViewState extends State<EditUserProfileView> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF1F1F20),
         title: const Text('Editar Perfil'),
+        foregroundColor: Colors.white,
         centerTitle: true,
         elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),

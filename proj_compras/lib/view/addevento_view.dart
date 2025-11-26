@@ -79,52 +79,49 @@ class _AddEventoViewState extends State<AddEventoView> {
     }
   }
 
-  Future<void> _criarEvento() async {
-    if (_tituloController.text.isEmpty ||
-        _descricaoController.text.isEmpty ||
-        _localizacaoController.text.isEmpty ||
-        _dataSelecionada == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor, preencha todos os campos')),
+Future<void> _criarEvento() async {
+  setState(() => _isLoading = true);
+
+  try {
+    // 🔥 ENVIA DateTime? E DEIXA O CONTROLLER VALIDAR
+    DateTime? dataParaEnviar;
+    if (_dataSelecionada != null) {
+      dataParaEnviar = DateTime(
+        _dataSelecionada!.year,
+        _dataSelecionada!.month,
+        _dataSelecionada!.day,
+        _horaSelecionada.hour,
+        _horaSelecionada.minute,
       );
-      return;
     }
 
-    setState(() => _isLoading = true);
+    final sucesso = await _controller.criarEvento(
+      context,
+      _tituloController.text,
+      _descricaoController.text,
+      dataParaEnviar, // 🔥 PODE SER NULL - CONTROLLER VAI VALIDAR
+      _localizacaoController.text,
+      null,
+    );
 
-    try {
-      await _controller.criarEvento(
-        _tituloController.text,
-        _descricaoController.text,
-        DateTime(
-          _dataSelecionada!.year,
-          _dataSelecionada!.month,
-          _dataSelecionada!.day,
-          _horaSelecionada.hour,
-          _horaSelecionada.minute,
+    if (sucesso && mounted) {
+      Navigator.pop(context, true);
+    }
+  } catch (e) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('❌ Erro inesperado: $e'),
+          backgroundColor: Colors.red,
         ),
-        _localizacaoController.text,
-        null, // imagemUrl opcional
       );
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Evento criado com sucesso!')),
-        );
-        Navigator.pop(context, true); // Retorna true para indicar sucesso
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+    }
+  } finally {
+    if (mounted) {
+      setState(() => _isLoading = false);
     }
   }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -182,6 +179,8 @@ class _AddEventoViewState extends State<AddEventoView> {
               decoration: InputDecoration(
                 labelText: 'Localização',
                 labelStyle: const TextStyle(color: Colors.grey),
+                hintText: 'Ex: Av. Paulista, 1000 - São Paulo, SP',
+                hintStyle: TextStyle(color: Colors.grey[500]),
                 prefixIcon: const Icon(Icons.location_on, color: Colors.grey),
                 enabledBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: Colors.grey[600]!),

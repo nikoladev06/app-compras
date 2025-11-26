@@ -115,7 +115,7 @@ class UserProfileController {
       }
 
       if (novaSenha != confirmarSenha) {
-        throw 'As senhas não correspondem';
+        throw 'As senhas não correspondentem';
       }
 
       if (senhaAtual == novaSenha) {
@@ -285,23 +285,32 @@ class UserProfileController {
   // Deletar post de evento
   Future<bool> deletarPostEvento(int postId) async {
     try {
-      print('🔄 Deletando post de evento...');
+      print('🔄 Deletando post de evento ID: $postId');
       User? user = _firebaseAuth.currentUser;
 
       if (user == null) throw 'Usuário não autenticado';
 
-      await _firebaseFirestore
+      // 🔥 BUSCA PELO ID NUMÉRICO NO CAMPO 'id'
+      QuerySnapshot snapshot = await _firebaseFirestore
           .collection('eventos')
           .where('id', isEqualTo: postId)
           .where('userId', isEqualTo: user.uid)
-          .get()
-          .then((snapshot) {
-        for (var doc in snapshot.docs) {
-          doc.reference.delete();
-        }
-      });
+          .get();
 
-      print('✅ Post de evento deletado');
+      print('📊 Documentos encontrados para deletar: ${snapshot.docs.length}');
+
+      if (snapshot.docs.isEmpty) {
+        print('❌ Nenhum documento encontrado com ID: $postId');
+        return false;
+      }
+
+      // 🔥 DELETA CADA DOCUMENTO ENCONTRADO
+      for (var doc in snapshot.docs) {
+        print('🗑️ Deletando documento: ${doc.id}');
+        await doc.reference.delete();
+      }
+
+      print('✅ Post de evento deletado com sucesso');
       return true;
     } catch (e) {
       print('❌ Erro ao deletar post: $e');

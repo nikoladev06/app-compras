@@ -84,18 +84,13 @@ class _UserProfileViewState extends State<UserProfileView> {
   }
 
   void _deletarEvento(int eventId) {
+    print('🔍 USERPROFILE: Tentando deletar evento com ID: $eventId');
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF1F1F20),
-        title: const Text(
-          'Deletar Evento',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: const Text(
-          'Tem certeza que deseja deletar este evento?',
-          style: TextStyle(color: Colors.grey),
-        ),
+        title: const Text('Deletar Evento', style: TextStyle(color: Colors.white)),
+        content: const Text('Tem certeza que deseja deletar este evento?', style: TextStyle(color: Colors.grey)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -103,19 +98,28 @@ class _UserProfileViewState extends State<UserProfileView> {
           ),
           TextButton(
             onPressed: () async {
-              Navigator.pop(context);
+               print('🔍 USERPROFILE: Confirmada exclusão do ID: $eventId');
+              Navigator.pop(context); // Fecha diálogo
+              
               bool sucesso = await _controller.deletarPostEvento(eventId);
+              
               if (sucesso && mounted) {
+                print('✅ USERPROFILE: Evento $eventId deletado com sucesso');
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Evento deletado com sucesso')),
                 );
-                await _carregarEventos();
+                
+                // 🔥 VOLTA DIRETO PARA O HOMEVIEW
+                print('↩️ USERPROFILE: Voltando para HomeView...');
+                Navigator.pop(context);
+              } else {
+                print('❌ USERPROFILE: Falha ao deletar evento $eventId');
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Erro ao deletar evento')),
+                );
               }
             },
-            child: const Text(
-              'Deletar',
-              style: TextStyle(color: Colors.red),
-            ),
+            child: const Text('Deletar', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -143,14 +147,20 @@ class _UserProfileViewState extends State<UserProfileView> {
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
-              bool sucesso =
-                  await _controller.deletarPostProfissional(postId);
+              bool sucesso = await _controller.deletarPostProfissional(postId);
               if (sucesso && mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text('Post deletado com sucesso')),
+                  const SnackBar(content: Text('Post deletado com sucesso')),
                 );
+
+                Navigator.pop(context);
+
                 await _carregarPostsProfissionais();
+                
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Erro ao deletar post')),
+                );
               }
             },
             child: const Text(
@@ -162,6 +172,7 @@ class _UserProfileViewState extends State<UserProfileView> {
       ),
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
