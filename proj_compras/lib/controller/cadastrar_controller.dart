@@ -47,6 +47,7 @@ class CadastrarController {
     String username,
     String universidade,
     String curso,
+    String telefone,
     String senha,
     String confirmarSenha,
   ) async {
@@ -88,6 +89,12 @@ class CadastrarController {
         throw 'As senhas não correspondem';
       }
 
+      if (telefone.isEmpty ||
+        !RegExp(r'^\(?\d{2}\)?[\s-]?\d{4,5}-?\d{4}$').hasMatch(telefone)) {
+        throw 'Telefone inválido. Use o formato (XX)XXXXX-XXXX ou XXXXXXXXXXX';
+      }
+
+
       print('✅ Validações concluídas');
 
       // Verificar email único
@@ -124,6 +131,7 @@ class CadastrarController {
         'username': username.toLowerCase(),
         'universidade': universidade,
         'curso': curso,
+        'telefone': telefone,
         'profileImage': '',
         'criadoEm': DateTime.now(),
       });
