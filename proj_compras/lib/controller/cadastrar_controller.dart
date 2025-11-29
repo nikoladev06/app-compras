@@ -19,7 +19,7 @@ class CadastrarController {
       return query.docs.isNotEmpty;
     } catch (e) {
       print('❌ Erro ao verificar username: $e');
-      return false;
+      rethrow; 
     }
   }
 
@@ -36,7 +36,7 @@ class CadastrarController {
       return query.docs.isNotEmpty;
     } catch (e) {
       print('❌ Erro ao verificar email: $e');
-      return false;
+      rethrow; 
     }
   }
 
@@ -163,6 +163,11 @@ class CadastrarController {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(mensagem)),
         );
+      }
+    } on FirebaseException catch (e) { // Captura erros do Firestore (como permission-denied)
+      print('❌ Erro Firebase: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro de permissão ao verificar dados. Verifique as regras do Firestore.')));
       }
     } catch (e) {
       print('❌ Erro geral: $e');
